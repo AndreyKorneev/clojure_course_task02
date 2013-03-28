@@ -1,6 +1,6 @@
 (ns clojure-course-task02.core
   (:gen-class)
-   :import java.io.File)
+  (:import java.io.File))
 
 (defn pmapcat [f batches]
   (->> batches
@@ -8,21 +8,15 @@
     (apply concat)
     doall))
 
-;(defn file-filter [predicate]
-;  (reify java.io.FilenameFilter
-;    (accept [_ dir name] (predicate dir name))))
-
-;(defn regexp-filter [re] (file-filter #((not (nil? (re-find re %2))))))
-;(def directory-filter (file-filter #(.isDirectory (File. % %2))))
-; Не удалось заставить работать эти функции ^^ - нужна помощь.
+(defn file-filter [predicate]
+  (reify java.io.FilenameFilter
+    (accept [_ dir name] (predicate dir name))))
 
 (defn regexp-filter [re]
-  (reify java.io.FilenameFilter
-    (accept [_ dir name] (not (nil? (re-find re name))))))
+  (file-filter #(boolean (re-find re %2))))
 
 (def directory-filter
-  (reify java.io.FilenameFilter
-    (accept [_ dir name] (.isDirectory (File. dir name)))))
+  (file-filter #(.isDirectory (File. %1 %2))))
 
 (defn find-files [file-name path]
   (let [file (File. path)]
@@ -36,7 +30,7 @@
                (map #(.getPath %) )
                (pmapcat #(find-files file-name %))))))
 
-; Или так? 
+; Или так?
 ;(defn find-files [file-name path]
 ;  (let [file (File. path)]
 ;    (concat (map #(.getName %) (.listFiles file (regexp-filter (re-pattern file-name))))
